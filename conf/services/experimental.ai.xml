@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<service id="experimental.ai"> 
+<properties>
+	<property name="sip-number" value=""/>
+	<property name="start-page" value="http://hosting-api-test.eyeline.mobi/start?sid=686"/>
+	<property name="use-method-post" value="false"/>
+	<property name="template-id" value="default"/>
+	<property name="scenario.default" value="default-noinform"/>
+	<property name="telegram.token" value="218977481:AAFToIn9qLeYeRtuHApOpAGTY-dccAKLQsk"/>
+	<property name="msbotframework.token" value=""/>
+	<property name="flag-tarif" value="true"/>
+	<property name="viber.token" value=""/>
+	<property name="tipay.login" value="telegram"/>
+	<property name="vkontakte.token" value=""/>
+	<property name="google-analytics-id" value=""/>
+	<property name="api-ai.token" value=""/>
+	<property name="tipay.password" value="password"/>
+	<property name="sip-ringing-delay" value="1000"/>
+	<property name="sip-processing-delay" value="1"/>
+	<property name="use-cookies" value="true"/>
+	<property name="inform-url" value=""/>
+	<property name="telegram.links.realignment.enabled" value="true"/>
+	<property name="permissions" value="push-ussd ewallet personalization push-sms push-service arrivedok-lookup imsi-hash"/>
+</properties>
+<interceptors>
+	<interceptor id="ai">
+		<class>com.eyeline.miniapps.interceptor.AiInterceptor</class>
+		<resource id="ai-expasoft-chatme" tag="agent"/>
+		<resource id="ai-chat-filters" tag="filter"/>
+		<property name="hosting-api-endpoint" value="http://hosting-api-test.eyeline.mobi/json?sid=686"/>
+		<property name="hosting-api-baseurl" value="http://hosting-api-test.eyeline.mobi/index?sid=686"/>
+		<property name="skip-pages" value="8 102 103 107"/>
+	</interceptor>
+</interceptors>
+</service>

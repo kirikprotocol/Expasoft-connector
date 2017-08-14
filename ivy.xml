@@ -1,0 +1,49 @@
+<ivy-module version="2.0">
+  <info organisation="mobi.eyeline.mobilizer" module="api-ai"/>
+  <dependencies>
+
+    <dependency org="commons-lang" name="commons-lang" rev="2.3"/>
+    <dependency org="log4j" name="log4j" rev="1.2.16"/>
+
+    <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.7.2" transitive="true"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="2.7.2" transitive="true"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.7.2" transitive="true"/>
+    <dependency org="com.fasterxml.jackson.jaxrs" name="jackson-jaxrs-json-provider" rev="2.7.2" transitive="true"/>
+    <dependency org="com.fasterxml.jackson.jaxrs" name="jackson-jaxrs-base" rev="2.7.2" transitive="true"/>
+    <dependency org="com.fasterxml.jackson.module" name="jackson-module-jaxb-annotations" rev="2.7.2" transitive="true"/>
+
+    <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.1" transitive="true"/>
+
+    <!-- dependency org="com.sun.jersey" name="jersey-core" rev="1.18" transitive="true"/>
+    <dependency org="com.sun.jersey" name="jersey-json" rev="1.18" transitive="true"/>
+    <dependency org="com.sun.jersey" name="jersey-client" rev="1.18" transitive="true"/>
+    <dependency org="com.sun.jersey.contribs" name="jersey-multipart" rev="1.18" transitive="true"/ -->
+
+
+    <dependency org="org.glassfish.jersey.core" name="jersey-client" rev="2.25.1" transitive="true"/>
+    <dependency org="org.glassfish.jersey.connectors" name="jersey-apache-connector" rev="2.25.1" transitive="true"/>
+    <dependency org="org.glassfish.jersey.containers" name="jersey-container-servlet" rev="2.22.2"/>
+    <dependency org="org.glassfish.jersey.media" name="jersey-media-jaxb" rev="2.22.2"/>
+    <dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1"/>
+    <dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.22.2"/>
+
+
+    <!-- dependency org="io.swagger" name="swagger-annotations" rev="1.5.0" transitive="false"/>
+    <dependency org="com.sun.jersey" name="jersey-core" rev="1.18" transitive="false"/>
+    <dependency org="com.sun.jersey" name="jersey-client" rev="1.18" transitive="false"/>
+    <dependency org="com.sun.jersey.contribs" name="jersey-multipart" rev="1.18" transitive="false"/>
+    <dependency org="com.fasterxml.jackson.datatype" name="jackson-datatype-joda" rev="2.1.5" transitive="false"/>
+    <dependency org="joda-time" name="joda-time" rev="2.3" transitive="false"/ -->
+
+      <!-- dependency org="com.googlecode.soundlibs" name="tritonus-share" rev="0.3.7-2" transitive="false"/>
+      <dependency org="com.googlecode.soundlibs" name="vorbisspi" rev="1.0.3-1" transitive="false"/ -->
+
+    <dependency org="commons-configuration" name="commons-configuration" rev="1.4" transitive="false"/>
+    <dependency org="mobi.eyeline.mobilizer" name="sads-utils" rev="[0.37,)" changing="true" transitive="false"/>
+    <dependency org="mobi.eyeline.mobilizer" name="sads-core" rev="[0.37,)" changing="true" transitive="false"/>
+    <dependency org="mobi.eyeline.mobilizer" name="sads-impl" rev="[0.164,)" changing="true" transitive="false"/>
+    <dependency org="dom4j" name="dom4j" rev="1.6.1"/>
+    <dependency org="javax.servlet" name="servlet-api" rev="2.5"/>
+
+  </dependencies>
+</ivy-module>
