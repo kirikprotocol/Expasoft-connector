@@ -33,11 +33,21 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
     //private ServiceAiHelper helper;
 
     private Set<String> skipPages;
+    private Set<String> hardSkipPages;
+    private Set<String> forwardPages;
+
     private Set<String> skipUrls;
     private Map<String, String> replacePages;
 
     String hostingApiEndpoint;
     String hostingApiBaseurl;
+
+    private boolean unknownEnabled;
+    private double thresholdUnknown;
+    private String forwardUnknownPage;
+
+    private String ignoreText;
+    private String ignorePage;
 
     @Override
     public void afterContentResponse(SADSRequest request, ContentRequest contentRequest, ContentResponse content, RequestDispatcher dispatcher) throws InterceptionException {
@@ -54,9 +64,6 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
                 log.info("Storing current page in session: "+currentPage);
             }
         }
-
-
-
     }
 
     private boolean isNeedToSkipUrl(SADSRequest request){
@@ -112,9 +119,21 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
                         log.info("the page is in skip url list. DONE");
                         return;
                     }
+                    if (hardSkipPages.contains(currentPage.getId())) {
+                        log.info("the page is in HARD prohibited list! DONE");
+                        request.getParameters().put("pid", currentPage.getId());
+                        //this.redirectRequest(request, currentPage, true, log);
+                        return;
+                    }
+
                     if (skipPages.contains(currentPage.getId())) {
                         log.info("the page is in prohibited list! DONE");
-                        //this.redirectRequest(request, currentPage, true, log);
+                        this.redirectRequest(request, currentPage, true, log);
+                        return;
+                    }
+                    if (text.startsWith(ignoreText)) {
+                        log.info("currentText is started with ignore phrase moving to special page: "+ignorePage);
+                        this.redirectRequest(request, helper.getById(ignorePage), true, log);
                         return;
                     }
                     List<AiAgent.Prediction> predictions;
@@ -147,6 +166,18 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
                         intentName = predictions.get(0).getIntent();
                     }
                     log.info("determined intent: "+intentName);
+                    if (unknownEnabled) {
+                        for (AiAgent.Prediction prediction: predictions) {
+                            if (intentName.equals(prediction.getIntent())) {
+                                log.info("Test probability of: "+intentName+", proba="+prediction.getProba()+" with "+thresholdUnknown);
+                                if (prediction.getProba()<=thresholdUnknown) {
+                                    log.info("redirecting to page: "+forwardUnknownPage);
+                                    this.redirectRequest(request, helper.getById(forwardUnknownPage), false, log);
+                                    return;
+                                }
+                            }
+                        }
+                    }
                     if (isStartDialog) {
                         log.info("It is a start of the dialog. Trying to find global intent: "+intentName);
                         Page nextPage = helper.lookupGlobal(intentName);
@@ -217,16 +248,22 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
             this.redirectRequest(request, toPage, url, log);
             return;
         }
-        /* String newUrl = toPage.getUrl();
-        Map<String,String> newParams = UrlUtils.getParametersMap(newUrl);
-        Map<String,String> currentParams = UrlUtils.getParametersMap(newUrl);
+        Page currentPage = (Page) request.getSession().getAttribute(SESS_ATTR_CURRENT_PAGE);
+        if (currentPage!=null && forwardPages.contains(currentPage.getId())) {
+            String newUrl = toPage.getUrl();
+            Map<String,String> newParams = UrlUtils.getParametersMap(newUrl);
+            Map<String,String> currentParams = UrlUtils.getParametersMap(newUrl);
+            String targetUrl = UrlUtils.removeAllParameters(newUrl);
+            targetUrl = UrlUtils.addParameters(targetUrl, currentParams);
+            targetUrl = UrlUtils.addParameters(targetUrl, newParams);
+            targetUrl = UrlUtils.removeParameter(targetUrl, "input_answer");
+            request.getParameters().remove("input_answer");
 
-        String targetUrl = UrlUtils.removeAllParameters(newUrl);
-        targetUrl = UrlUtils.addParameters(targetUrl, currentParams);
-        targetUrl = UrlUtils.addParameters(targetUrl, newParams);
+            request.getParameters().putAll(newParams);
+            request.setResourceURI(targetUrl);
 
-        request.getParameters().putAll(newParams); */
-
+            return;
+        }
         String requestUrl = request.getResourceURI();
         requestUrl = UrlUtils.addParameters(requestUrl, UrlUtils.getParametersMap(toPage.getUrl()));
         requestUrl = StringUtils.replace(requestUrl, "/start?","/index?");
@@ -264,6 +301,19 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
         if (StringUtils.isNotBlank(skipPagesParam)) {
             Collections.addAll(skipPages, skipPagesParam.split(" "));
         }
+
+        hardSkipPages = new HashSet<>();
+        String hardSkipPagesParam = InitUtils.getString("hard-skip-pages", "", config);
+        if (StringUtils.isNotBlank(hardSkipPagesParam)) {
+            Collections.addAll(hardSkipPages, hardSkipPagesParam.split(" "));
+        }
+
+        forwardPages = new HashSet<>();
+        String forwardPagesParam = InitUtils.getString("forward-pages", "", config);
+        if (StringUtils.isNotBlank(forwardPagesParam)) {
+            Collections.addAll(forwardPages, forwardPagesParam.split(" "));
+        }
+
         localPriority = InitUtils.getBoolean("local-priority", true, config);
         relativeFilter = InitUtils.getBoolean("relative-filter", true, config);
         threshold = InitUtils.getDouble("threshold", 0.25, config);
@@ -275,6 +325,12 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
         if (StringUtils.isNotBlank(skipUrlsParam)) {
             Collections.addAll(skipUrls, skipUrlsParam.split(" "));
         }
+        unknownEnabled = InitUtils.getBoolean("unknown-enabled", false, config);
+        thresholdUnknown = InitUtils.getDouble("unknown-threshold", 0.01, config);
+        forwardUnknownPage = InitUtils.getString("unknown-page", "71", config);
+
+        ignoreText = InitUtils.getString("ignore-text", "пользователь nickname=", config);
+        ignorePage = InitUtils.getString("ignore-page", "117", config);
 
     }
 }
