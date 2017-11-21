@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource id="ai-rasa">
+    <factory class="com.eyeline.rasa.RasaAiAgent$Factory" />
+    <properties>
+      <property name="url" value="http://expasoft.com:33113"/>
+      <property name="project" value="test_project"/>
+      <property name="model" value="model_20171114-125144"/>
+    </properties>
+    <config>
+    </config>
+</resource>
