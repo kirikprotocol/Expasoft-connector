@@ -8,7 +8,7 @@
 %><%@ page contentType="text/html;charset=UTF-8" language="java"
 %><%!
     private AiApplicationClient agent =  new AiApplicationClient("http://devel.globalussd.mobi/ai/ai", "ai-expasoft-chatme");
-    private Logger log = Logger.getLogger("expasoft_chat_logs");
+    private Logger log = Logger.getLogger("ai_chat_logs");
 %><%
     String eventType = request.getParameter("event.type");
     String input = null;

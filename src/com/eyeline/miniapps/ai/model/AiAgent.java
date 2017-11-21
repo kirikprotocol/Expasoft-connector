@@ -1,6 +1,7 @@
 package com.eyeline.miniapps.ai.model;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public interface AiAgent {
         }
 
         public Prediction(String intent, Double proba) {
-            this(intent, proba, Collections.emptyMap());
+            this(intent, proba, new HashMap<String, Object>(0));
         }
 
         public Prediction(String intent, Double proba, Map<String,Object> entities) {
