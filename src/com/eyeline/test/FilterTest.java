@@ -1,7 +1,6 @@
 package com.eyeline.test;
 
-import com.eyeline.expasoft.chatme.filter.Filter;
-import com.eyeline.expasoft.chatme.filter.PatternReplaceWordFilter;
+import com.eyeline.miniapps.filter.PatternReplaceWordFilter;
 
 import java.util.Properties;
 

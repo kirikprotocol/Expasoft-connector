@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resource id="ai-expasoft-chatme">
-    <factory class="com.eyeline.miniapps.resource.ChatmeAgentResourceFactory" />
+    <factory class="com.eyeline.expasoft.chatme.ChatmeAgentResourceFactory" />
     <properties>
       <property name="url" value="http://ubuntu@expasoft.com:5000/chatme/pilot/api/v1.0"/>
       <property name="login" value="test0"/>

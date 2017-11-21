@@ -1,4 +1,4 @@
-package com.eyeline.expasoft.chatme.utils;
+package com.eyeline.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;

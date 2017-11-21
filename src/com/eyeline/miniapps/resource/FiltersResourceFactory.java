@@ -1,8 +1,8 @@
 package com.eyeline.miniapps.resource;
 
-import com.eyeline.expasoft.chatme.filter.ChainFilter;
-import com.eyeline.expasoft.chatme.filter.ConditionFilter;
-import com.eyeline.expasoft.chatme.filter.Filter;
+import com.eyeline.miniapps.filter.ChainFilter;
+import com.eyeline.miniapps.filter.ConditionFilter;
+import com.eyeline.miniapps.filter.Filter;
 import com.eyelinecom.whoisd.sads2.common.Configurator;
 import com.eyelinecom.whoisd.sads2.common.Initable;
 import com.eyelinecom.whoisd.sads2.common.SADSInitUtils;

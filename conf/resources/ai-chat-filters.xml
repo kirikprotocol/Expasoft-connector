@@ -4,23 +4,23 @@
     <properties/>
 <config>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="плюс"/>
         <property name="what.01" value="+"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.PatternReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.PatternReplaceFilter</class>
         <property name="to" value=" "/>
         <property name="what.01" value="(?U)[\pP]"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.NormalizeFilter</class>
+        <class>com.eyeline.miniapps.filter.NormalizeFilter</class>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.ToLowercaseFilter</class>
+        <class>com.eyeline.miniapps.filter.ToLowercaseFilter</class>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="смарт"/>
         <property name="what.01" value="ыьфке"/>
         <property name="what.02" value="smrat"/>
@@ -30,14 +30,14 @@
         <property name="what.06" value="smart"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="мини"/>
         <property name="what.01" value="mini"/>
         <property name="what.02" value="vbyb"/>
         <property name="what.03" value="ьштш"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="забугорище"/>
         <property name="what.01" value="бугорище"/>
         <property name="what.02" value="забугоризе"/>
@@ -56,14 +56,14 @@
         <property name="what.15" value="позорища"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="топ"/>
         <property name="what.01" value="top"/>
         <property name="what.02" value="ещз"/>
         <property name="what.03" value="njg"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="смарт мини"/>
 	<property name="what.01" value="ыьфкемини"/>
 	<property name="what.02" value="smratмини"/>
@@ -91,7 +91,7 @@
 	<property name="what.24" value="смартmini"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="безлимитище"/>
 	<property name="what.01" value="безлимитише"/>
 	<property name="what.02" value="безлимитище"/>
@@ -109,14 +109,14 @@
 	<property name="what.14" value="бещлиитище"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
      	<property name="to" value="плюс"/>
 	<property name="what.01" value="plus"/>
 	<property name="what.02" value="glc"/>
 	<property name="what.03" value="плбс"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
 	<property name="to" value="смарт плюс"/>
 	<property name="what.01" value="ыьфкеплюс"/>
 	<property name="what.02" value="smratплюс"/>
@@ -145,7 +145,7 @@
 	<property name="what.25" value="smartплбс"/>    
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="плюс"/>
         <property name="what.01" value="смарт плюс"/>
         <property name="what.02" value="плюс смарт"/>
@@ -153,25 +153,25 @@
         <property name="what.04" value="забугорище смарт"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="мини"/>
         <property name="what.01" value="смарт мини"/>
         <property name="what.02" value="мини смарт"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="топ"/>
         <property name="what.01" value="смарт топ"/>
         <property name="what.02" value="топ смарт"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="безлимитище"/>
         <property name="what.01" value="смарт безлимитище"/>
         <property name="what.02" value="безлимитище смарт"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
 	<property name="to" value="обещанный"/>
 	<property name="what.01" value="обещ"/>
 	<property name="what.02" value="доверительный"/>
@@ -184,7 +184,7 @@
 	<property name="what.09" value="обешанный"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
 	<property name="to" value="платеж"/>
 	<property name="what.01" value="платёж"/>
 	<property name="what.02" value="пл"/>
@@ -192,13 +192,13 @@
 	<property name="what.04" value="плате"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="обещанный платеж"/>
         <property name="what.01" value="оп"/>
         <property name="what.02" value="op"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
 	<property name="to" value="автопродление"/>
 	<property name="what.01" value="fdnjghjlktybt"/>
 	<property name="what.02" value="автопродленье"/>
@@ -209,14 +209,14 @@
 	<property name="what.07" value="автпродлние"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
 	<property name="to" value="опция"/>
 	<property name="what.01" value="jgwbz"/>
 	<property name="what.03" value="особенность"/>
 	<property name="what.04" value="option"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
 	<property name="to" value="гудок"/>
 	<property name="what.01" value="гуодок"/>
 	<property name="what.02" value="гуудок"/>
@@ -228,7 +228,7 @@
 	<property name="what.08" value="goodok"/>
     </filter>
     <filter>
-    	<class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+    	<class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
 	<property name="to" value="квартира"/>
 	<property name="what.01" value="коммуналка"/>
 	<property name="what.02" value="коммуналку"/>
@@ -246,7 +246,7 @@
 	<property name="what.10" value="вода"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="коммуна"/>
         <property name="what.01" value="коммуна"/>
         <property name="what.02" value="каммуна"/>
@@ -258,7 +258,7 @@
         <property name="what.08" value="каммунна"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="квартиру"/>
         <property name="what.01" value="коммунальный платеж"/>
         <property name="what.02" value="коммунального платежа"/>
@@ -290,7 +290,7 @@
         <property name="what.28" value="услуге коммунальной"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="энергию"/>
         <property name="what.01" value="энергосбыт"/>
         <property name="what.02" value="энергосбыту"/>
@@ -299,7 +299,7 @@
         <property name="what.05" value="свет"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceWordFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceWordFilter</class>
         <property name="to" value="интернет"/>
         <property name="what.01" value="трафик"/>
         <property name="what.02" value="траффик"/>
@@ -310,7 +310,7 @@
         <property name="what.07" value="инет"/>
     </filter>
     <filter>
-        <class>com.eyeline.expasoft.chatme.filter.StringReplaceFilter</class>
+        <class>com.eyeline.miniapps.filter.StringReplaceFilter</class>
         <property name="to" value="интернет"/>
         <property name="what.01" value="трафик"/>
         <property name="what.02" value="траффик"/>

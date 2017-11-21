@@ -1,4 +1,4 @@
-package com.eyeline.expasoft.chatme.filter;
+package com.eyeline.miniapps.filter;
 
 import com.eyelinecom.whoisd.sads2.common.InitUtils;
 import com.eyelinecom.whoisd.sads2.common.Initable;

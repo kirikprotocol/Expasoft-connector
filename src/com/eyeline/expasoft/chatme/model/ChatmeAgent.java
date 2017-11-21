@@ -1,8 +1,6 @@
 package com.eyeline.expasoft.chatme.model;
 
-import com.eyeline.expasoft.chatme.filter.BlankFilter;
-import com.eyeline.expasoft.chatme.filter.Filter;
-import com.eyeline.expasoft.chatme.utils.MarshalUtils;
+import com.eyeline.utils.MarshalUtils;
 import com.eyeline.miniapps.ai.model.AiAgent;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

@@ -1,6 +1,6 @@
 package com.eyeline.miniapps.connector;
 
-import com.eyeline.expasoft.chatme.filter.Filter;
+import com.eyeline.miniapps.filter.Filter;
 import com.eyeline.miniapps.ai.model.AiAgent;
 import com.eyelinecom.whoisd.sads2.executors.connector.SADSInitializer;
 import com.eyelinecom.whoisd.sads2.resource.ResourceStorage;

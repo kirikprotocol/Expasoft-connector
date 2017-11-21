@@ -1,4 +1,4 @@
-package com.eyeline.expasoft.chatme.utils;
+package com.eyeline.expasoft.chatme;
 
 import com.eyeline.expasoft.chatme.model.ChatmeAgent;
 import com.eyeline.expasoft.chatme.model.IntentResponse;

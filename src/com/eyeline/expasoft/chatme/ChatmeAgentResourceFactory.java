@@ -1,9 +1,7 @@
-package com.eyeline.miniapps.resource;
+package com.eyeline.expasoft.chatme;
 
-import com.eyeline.expasoft.chatme.filter.Filter;
 import com.eyeline.expasoft.chatme.model.ChatmeAgent;
 import com.eyelinecom.whoisd.sads2.common.InitUtils;
-import com.eyelinecom.whoisd.sads2.common.SADSInitUtils;
 import com.eyelinecom.whoisd.sads2.resource.ResourceFactory;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 

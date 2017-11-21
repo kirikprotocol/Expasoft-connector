@@ -1,6 +1,6 @@
 package com.eyeline.miniapps.ai.model;
 
-import com.eyeline.expasoft.chatme.utils.MarshalUtils;
+import com.eyeline.utils.MarshalUtils;
 import com.eyelinecom.whoisd.sads2.common.UrlUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource id="ai-dummy">
+    <factory class="com.eyeline.miniapps.ai.model.TestAiAgent$Factory" />
+    <properties>
+    </properties>
+    <config>
+    </config>
+</resource>

@@ -1,24 +1,22 @@
-package com.eyeline.expasoft.chatme.filter;
+package com.eyeline.miniapps.filter;
 
 import com.eyelinecom.whoisd.sads2.common.InitUtils;
 import com.eyelinecom.whoisd.sads2.common.Initable;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Properties;
 
 /**
  * Created by jeck on 19/07/17.
  */
-public class StringReplaceFilter implements Filter, Initable{
-    private Collection<String> whats;
+public class PatternReplaceFilter implements Filter, Initable {
+    private Collection<String> patterns;
     private String to;
 
     @Override
     public String filter(String userSay) {
-        for (String what: whats) {
-            userSay = StringUtils.replace(userSay, what, to);
+        for (String pattern: patterns) {
+            userSay = userSay.replaceAll(pattern, to);
         }
         return userSay;
     }
@@ -31,6 +29,6 @@ public class StringReplaceFilter implements Filter, Initable{
     @Override
     public void init(Properties config) throws Exception {
         to = InitUtils.getString("to", config);
-        whats = InitUtils.getOrderedStringsStartsWith("what.", config);
+        patterns = InitUtils.getOrderedStringsStartsWith("what.", config);
     }
 }

@@ -1,4 +1,4 @@
-package com.eyeline;
+package com.eyeline.expasoft.chatme;
 
 import com.eyeline.expasoft.chatme.model.*;
 

@@ -1,6 +1,6 @@
 package com.eyeline.miniapps.interceptor;
 
-import com.eyeline.expasoft.chatme.filter.Filter;
+import com.eyeline.miniapps.filter.Filter;
 import com.eyeline.miniapps.ai.model.AiAgent;
 import com.eyeline.miniapps.ai.model.HostingApi;
 import com.eyeline.miniapps.ai.model.Page;

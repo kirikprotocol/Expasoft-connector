@@ -1,4 +1,4 @@
-package com.eyeline.expasoft.chatme.filter;
+package com.eyeline.miniapps.filter;
 
 import java.util.List;
 
