@@ -75,13 +75,13 @@
 		</jar>
 	</target>
 
-	<target name="distr" depends="jar,test">
+	<target name="distr" depends="jar">
 		<ivy:publish resolver="${resolver}" pubrevision="${release-version}" overwrite="true">
 			<artifacts pattern=".build/distr/[artifact].[ext]"/>
 		</ivy:publish>
 	</target>
 
-	<target name="compile-test" depends="build">
+	<!--target name="compile-test" depends="build">
 		<mkdir dir="${build-dir}/test"/>
 		<javac destdir="${build-dir}/test"
 			   optimize="off"
@@ -114,7 +114,6 @@
 			<batchtest todir="${report-dir}/tmp/test">
 				<fileset dir="${test-src}">
 					<include name="**/*Test.java"/>
-					<!-- a '$' in the filename indicates an inner class -->
 					<exclude name="**/*$*"/>
 				</fileset>
 
@@ -129,6 +128,6 @@
 
 		<delete dir="${report-dir}/tmp"/>
 		<fail if="junit.failure" message="Unit test(s) failed. See reports!"/>
-	</target>
+	</target -->
 
 </project>
