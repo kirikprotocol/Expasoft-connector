@@ -8,7 +8,7 @@ import com.eyeline.miniapps.ai.model.ServiceAiHelper;
  */
 public class HostingApiTest {
     public static void main(String[] args) throws Exception {
-        HostingApi api = new HostingApi("http://hosting-api-test.eyeline.mobi/json?sid=686", "http://hosting-api-test.eyeline.mobi/index?sid=686");
+        HostingApi api = new HostingApi("http://hosting-api-test.eyeline.mobi/json?sid=686");
         ServiceAiHelper helper = new ServiceAiHelper(api.getPages());
     }
 }

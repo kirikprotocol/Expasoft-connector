@@ -20,18 +20,12 @@ public class HostingApi {
     private static final String PARAM_CUSTOM_ID = "custom_id";
 
     private String url;
-    private String contentBase;
 
     private HttpClientBuilder builder;
 
-    public HostingApi(String endpoint, String contentBase) {
+    public HostingApi(String endpoint) {
         this.url = endpoint;
-        this.contentBase = contentBase;
         this.builder = HttpClientBuilder.create();
-    }
-
-    public String getUrl(String customId) throws Exception {
-        return UrlUtils.addParameter(contentBase, PARAM_CUSTOM_ID, customId);
     }
 
     public Set<Page> getPages() throws Exception {

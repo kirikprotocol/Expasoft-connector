@@ -95,7 +95,7 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
         }
         ServiceAiHelper helper;
         try {
-            HostingApi hostingApi = new HostingApi(hostingApiEndpoint, hostingApiBaseurl);
+            HostingApi hostingApi = new HostingApi(hostingApiEndpoint);
             helper = new ServiceAiHelper(hostingApi.getPages());
             request.getAttributes().put(REQ_ATTR_HELPER, helper);
         } catch (Exception e) {

@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-  <info organisation="mobi.eyeline.mobilizer" module="api-ai"/>
+  <info organisation="mobi.eyeline.mobilizer" module="sads-ai"/>
   <dependencies>
 
     <dependency org="commons-lang" name="commons-lang" rev="2.3"/>
@@ -44,6 +44,6 @@
     <dependency org="mobi.eyeline.mobilizer" name="sads-impl" rev="[0.164,)" changing="true" transitive="false"/>
     <dependency org="dom4j" name="dom4j" rev="1.6.1"/>
     <dependency org="javax.servlet" name="servlet-api" rev="2.5"/>
-
+    <dependency org="junit" name="junit" rev="4.10"/>
   </dependencies>
 </ivy-module>

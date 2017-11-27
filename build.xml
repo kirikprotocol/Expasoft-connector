@@ -1,4 +1,4 @@
-<project xmlns:ivy="antlib:org.apache.ivy.ant" name="chatme" basedir="." default="jar">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="sads-ai" basedir="." default="jar">
 
 	<property file="build.properties"/>
 

@@ -14,12 +14,15 @@ import java.util.List;
 /**
  * Created by jeck on 24/07/17.
  */
-@Path("ai/{aiAgent}")
+@Path("{aiAgent}")
 public class AiResource implements AiAgent{
     private static final Logger log = Logger.getLogger(AiResource.class);
 
     private ResourceStorage storage;
-    private String filterName = "ai-chat-filters";
+
+    @DefaultValue("ai-chat-filters")
+    @QueryParam("filter")
+    String filterName;
 
     @PathParam("aiAgent")
     String aiAgent;
