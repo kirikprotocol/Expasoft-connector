@@ -256,8 +256,8 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
             String targetUrl = UrlUtils.removeAllParameters(newUrl);
             targetUrl = UrlUtils.addParameters(targetUrl, currentParams);
             targetUrl = UrlUtils.addParameters(targetUrl, newParams);
-            targetUrl = UrlUtils.removeParameter(targetUrl, "input_answer");
-            request.getParameters().remove("input_answer");
+            targetUrl = UrlUtils.removeParameter(targetUrl, "answer");
+            request.getParameters().remove("answer");
 
             request.getParameters().putAll(newParams);
             request.setResourceURI(targetUrl);
@@ -268,8 +268,8 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
         requestUrl = UrlUtils.addParameters(requestUrl, UrlUtils.getParametersMap(toPage.getUrl()));
         requestUrl = StringUtils.replace(requestUrl, "/start?","/index?");
         if (!defaultLink) {
-            requestUrl = UrlUtils.removeParameter(requestUrl, "input_answer");
-            request.getParameters().remove("input_answer");
+            requestUrl = UrlUtils.removeParameter(requestUrl, "answer");
+            request.getParameters().remove("answer");
         }
         request.setResourceURI(requestUrl);
         request.getParameters().put("pid", toPage.getId());
