@@ -50,8 +50,8 @@
 		<javac destdir="${build-dir}/out"
 			   optimize="off"
 			   debug="on"
-			   source="1.7"
-			   target="1.7"
+			   source="1.8"
+			   target="1.8"
 			   encoding="UTF-8"
 			   nowarn="true"
 			   includeantruntime="false">
@@ -86,8 +86,8 @@
 		<javac destdir="${build-dir}/test"
 			   optimize="off"
 			   debug="on"
-			   source="1.7"
-			   target="1.7"
+			   source="1.8"
+			   target="1.8"
 			   encoding="UTF-8"
 			   nowarn="true"
 			   includeantruntime="false">

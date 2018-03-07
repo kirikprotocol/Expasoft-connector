@@ -3,6 +3,8 @@ package com.eyeline.miniapps.interceptor;
 import com.eyeline.miniapps.ai.model.HostingApi;
 import com.eyeline.miniapps.ai.model.Page;
 import com.eyeline.miniapps.ai.model.ServiceAiHelper;
+import com.eyeline.miniapps.connector.TgStartLinkServlet;
+import com.eyeline.miniapps.resource.StartLinkProvider;
 import com.eyelinecom.whoisd.sads2.RequestDispatcher;
 import com.eyelinecom.whoisd.sads2.common.InitUtils;
 import com.eyelinecom.whoisd.sads2.common.Initable;
@@ -10,16 +12,23 @@ import com.eyelinecom.whoisd.sads2.common.SADSLogger;
 import com.eyelinecom.whoisd.sads2.common.UrlUtils;
 import com.eyelinecom.whoisd.sads2.connector.SADSRequest;
 import com.eyelinecom.whoisd.sads2.exception.InterceptionException;
+import com.eyelinecom.whoisd.sads2.exception.NotFoundResourceException;
+import com.eyelinecom.whoisd.sads2.executors.connector.SADSInitializer;
 import com.eyelinecom.whoisd.sads2.interceptor.BlankInterceptor;
+import com.eyelinecom.whoisd.sads2.profile.ProfileStorage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
+import org.apache.log4j.Logger;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
  * Created by jeck on 22/11/17.
  */
 public class StartParameterInterceptor extends BlankInterceptor implements Initable {
+    private final Logger log = Logger.getLogger(TgStartLinkServlet.class);
+
     private static final String START_COMMAND = "/start ";
 
     private String hostingApiBaseUrl;
@@ -42,25 +51,62 @@ public class StartParameterInterceptor extends BlankInterceptor implements Inita
     @Override
     public void onRequest(SADSRequest request, RequestDispatcher dispatcher) throws InterceptionException {
         Log log = SADSLogger.getLogger(request.getServiceId(), request.getAbonent(), this.getClass());
-        if (request.getResourceURI().startsWith(hostingApiBaseUrl)) {
-            String eventText = request.getParameters().get("event.text");
-            if (StringUtils.isNotBlank(eventText)) {
-                if (eventText.startsWith(START_COMMAND)) {
-                    String startParameter = eventText.substring(START_COMMAND.length());
-                    log.info("found start request parameter: "+startParameter);
-                    HostingApi api = buildHostingApi(request);
-                    if (api == null) return;
-                    try {
-                        ServiceAiHelper helper = new ServiceAiHelper(api.getPages());
-                        Page targetPage = helper.lookupGlobal(startParameter);
-                        log.info("found page: "+targetPage);
-                        if (targetPage!=null) {
-                            this.redirectRequest(request, targetPage, log);
-                        }
-                    } catch (Exception e) {
-                        log.warn("Can't get pages from hosting API", e);
-                    }
+
+        String eventText = request.getParameters().get("event.text");
+        if (StringUtils.isNotBlank(eventText)) {
+            if (eventText.startsWith(START_COMMAND)) {
+                processStartCommand(request, log, eventText);
+            }
+        }
+
+    }
+
+    private void processStartCommand(SADSRequest request, Log log, String eventText) {
+        final String startParameter = eventText.substring(START_COMMAND.length());
+        if (StringUtils.isBlank(startParameter)) {
+            return;
+        }
+
+        log.info("Found start request parameter: " + startParameter);
+
+        if (!startParameter.startsWith(StartLinkProvider.PREFIX_HASH)) {
+            tryRedirect(request, log, startParameter);
+            return;
+        }
+
+        final String hash = startParameter.substring(StartLinkProvider.PREFIX_HASH.length());
+        if (StringUtils.isNotBlank(hash)) {
+            try {
+                final Map<String, ?> params = new StartLinkProvider(getProfileStorage()).unpack(hash);
+                params.forEach((s, o) -> request.getSession().setAttribute("session." + s, o));
+
+                final String pageId = (String) params.get(TgStartLinkServlet.PARAM_START_PAGE);
+                if (pageId != null) {
+                    tryRedirect(request, log, pageId);
                 }
+
+            } catch (Exception e) {
+                log.warn("Start link parsing failed, falling back to page redirect:" +
+                    " start = [" + startParameter + "]", e);
+
+                tryRedirect(request, log, startParameter);
+            }
+        }
+    }
+
+    private void tryRedirect(SADSRequest request, Log log, String pageId) {
+        if (request.getResourceURI().startsWith(hostingApiBaseUrl)) {
+            HostingApi api = buildHostingApi(request);
+            if (api == null) return;
+            try {
+                ServiceAiHelper helper = new ServiceAiHelper(api.getPages());
+                Page targetPage = helper.lookupGlobal(pageId);
+                log.info("found page: " + targetPage);
+                if (targetPage != null) {
+                    this.redirectRequest(request, targetPage, log);
+                }
+            } catch (Exception e) {
+                log.warn("Can't get pages from hosting API", e);
             }
         }
     }
@@ -79,6 +125,16 @@ public class StartParameterInterceptor extends BlankInterceptor implements Inita
     public void init(Properties config) throws Exception {
         hostingApiBaseUrl = InitUtils.getString("hosting-api-base", config);
         hostingApiEndpointBase = InitUtils.getString("hosting-api-endpoint", config);
+    }
+
+    private ProfileStorage getProfileStorage() {
+        try {
+            return (ProfileStorage) SADSInitializer.getResourceStorage().get("profile-storage");
+
+        } catch (NotFoundResourceException e) {
+            log.info("Profile storage unavailable", e);
+            return null;
+        }
     }
 
     @Override
