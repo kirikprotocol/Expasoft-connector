@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
@@ -96,6 +95,10 @@ public class StartLinkProvider {
     private static final Logger log = Logger.getLogger(MsgPackUtil.class.getName());
 
     static Value asValue(Object v) {
+      return asValue(v, false);
+    }
+
+    static Value asValue(Object v, boolean isMapKey) {
 
       if (v == null) {
         return ValueFactory.newNil();
@@ -113,13 +116,16 @@ public class StartLinkProvider {
         final String stringVal = (String) v;
 
         if (stringVal.equals(RefId.getValue())) {
-          return RefId.newRefId();
+          return ValueFactory.newInteger(1);
+//          return RefId.newRefId();
 
         } else if (stringVal.equals(StartPage.getValue())) {
-          return StartPage.newStartPage();
+          return ValueFactory.newInteger(2);
+//          return StartPage.newStartPage();
 
         } else if (StringUtils.isAsciiPrintable(stringVal)) {
-          return AsciiStringValue.newValue(stringVal);
+          return ValueFactory.newBinary(stringVal.getBytes(StandardCharsets.US_ASCII));
+//          return AsciiStringValue.newValue(stringVal);
 
         } else {
           return ValueFactory.newString(stringVal); // UTF-8
@@ -145,36 +151,50 @@ public class StartLinkProvider {
         final Map<?, ?> map = (Map) v;
 
         final ValueFactory.MapBuilder builder = ValueFactory.newMapBuilder();
-        map.forEach((k, kv) -> builder.put(asValue(k), asValue(kv)));
+        map.forEach((k, kv) -> builder.put(asValue(k, true), asValue(kv)));
         return builder.build();
       }
 
-      if (v.getClass().isArray()) {
-        final Class<?> cType = v.getClass().getComponentType();
-        if (byte.class == cType) {
-          return ValueFactory.newBinary((byte[]) v);
-
-        } else {
-          final Object[] array = (Object[]) v;
-          return ValueFactory.newArray(
-              Arrays.stream(array).map(MsgPackUtil::asValue).toArray(Value[]::new)
-          );
-        }
-      }
+//      if (v.getClass().isArray()) {
+//        final Class<?> cType = v.getClass().getComponentType();
+//        if (byte.class == cType) {
+//          return ValueFactory.newBinary((byte[]) v);
+//
+//        } else {
+//          final Object[] array = (Object[]) v;
+//          return ValueFactory.newArray(
+//              Arrays.stream(array).map(MsgPackUtil::asValue).toArray(Value[]::new)
+//          );
+//        }
+//      }
 
       log.warning("Object [" + v + "] cannot be serialized: the type is not supported");
 
       return ValueFactory.newNil();
     }
 
-    @SuppressWarnings("unchecked")
     static <T> T asObject(Value v) {
+      return asObject(v, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> T asObject(Value v, boolean isMapKey) {
       if (v.isNilValue()) {
         return null;
       }
 
       if (v.isNumberValue()) {
-        return (T) (Long) v.asNumberValue().toLong();
+        final Long longVal = v.asNumberValue().toLong();
+
+        if (isMapKey && longVal == 1) {
+          return (T) RefId.getValue();
+
+        } else if (isMapKey && longVal == 2) {
+          return (T) StartPage.getValue();
+
+        } else {
+          return (T) longVal;
+        }
       }
 
       if (v.isStringValue()) {
@@ -212,7 +232,7 @@ public class StartLinkProvider {
             .stream()
             .collect(
                 toMap(
-                    o -> asObject(o.getKey()),
+                    o -> asObject(o.getKey(), true),
                     o -> asObject(o.getValue())
                 )
             );
@@ -233,7 +253,9 @@ public class StartLinkProvider {
       }
 
       if (v.isBinaryValue()) {
-        return (T) v.asBinaryValue().asByteArray();
+        return (T) new String(v.asBinaryValue().asByteArray(), StandardCharsets.US_ASCII);
+//        return ValueFactory.newBinary(stringVal.getBytes(StandardCharsets.US_ASCII));
+//        return (T) v.asBinaryValue().asByteArray();
       }
 
       log.warning("Value [" + v + "] cannot be deserialized: the type is not supported");
@@ -308,9 +330,18 @@ public class StartLinkProvider {
 
     final String packed = startLinkProvider.pack(new HashMap<String, Object>() {{
       put(TgStartLinkServlet.PARAM_START_PAGE, "page1");
-//      put("ref_id", "a25c1247-1d81-404a-a01b-5a58c111a791");
+      put("ref_id", "a25c1247-1d81-404a-a01b-5a58c111a791");
     }});
 
+
+//    packed = gscAAs47msn_xwADxwUBcGFnZTE
+//    unpacked = {ref_id=a25c1247-1d81-404a-a01b-5a58c111a791, start=page1}
+
+//    packed = ggHOO5rJ_wLHBQFwYWdlMQ
+//    unpacked = {ref_id=a25c1247-1d81-404a-a01b-5a58c111a791, start=page1}
+
+//    packed = ggHOO5rJ_wLEBXBhZ2Ux
+//    unpacked = {ref_id=a25c1247-1d81-404a-a01b-5a58c111a791, start=page1}
     System.out.println("packed = " + packed);
 
     final Map<String, ?> unpacked = startLinkProvider.unpack(packed);

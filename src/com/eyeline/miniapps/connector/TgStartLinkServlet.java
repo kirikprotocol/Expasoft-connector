@@ -7,6 +7,7 @@ import com.eyelinecom.whoisd.sads2.executors.connector.SADSInitializer;
 import com.eyelinecom.whoisd.sads2.profile.ProfileStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -24,7 +25,7 @@ import static org.apache.commons.lang.StringUtils.trimToNull;
 
 public class TgStartLinkServlet extends HttpServlet {
 
-  private final Logger log = Logger.getLogger(TgStartLinkServlet.class);
+  private static final Logger log = Logger.getLogger(TgStartLinkServlet.class);
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -50,6 +51,9 @@ public class TgStartLinkServlet extends HttpServlet {
                       HttpServletResponse resp) throws IOException {
 
     final Map<String, String> params = parseParams(req);
+    if (log.isDebugEnabled()) {
+      log.debug("IN: " + params);
+    }
 
     final String link = params.remove(PARAM_BASE_LINK);
     if (link != null) {
@@ -59,7 +63,7 @@ public class TgStartLinkServlet extends HttpServlet {
           respond(
               resp,
               400,
-              ImmutableMap.of("error", "Invalid bot URL: [" + PARAM_BASE_LINK + "]: unknown host")
+              ImmutableMap.of("error", "Invalid bot URL: [" + link + "]: unknown host")
           );
           return;
         }
@@ -68,7 +72,7 @@ public class TgStartLinkServlet extends HttpServlet {
         respond(
             resp,
             400,
-            ImmutableMap.of("error", "Invalid bot URL: [" + PARAM_BASE_LINK + "]: malformed URL")
+            ImmutableMap.of("error", "Invalid bot URL: [" + link + "]: malformed URL")
         );
         return;
       }
@@ -86,9 +90,31 @@ public class TgStartLinkServlet extends HttpServlet {
           400,
           ImmutableMap.of("error", "Invalid parameter: [" + nonAscii.get().getKey() + " = " + nonAscii.get().getValue() + "]")
       );
+      return;
+    }
+
+    final Optional<String> integerKey = params
+        .keySet()
+        .stream()
+        .filter(k -> StringUtils.isNumeric(k.substring(0, 1)))
+        .findFirst();
+    if (integerKey.isPresent()) {
+      respond(
+          resp,
+          400,
+          ImmutableMap.of("error", "Invalid key: [" + integerKey.get() + "]")
+      );
+      return;
     }
 
     final String startPage = params.get(PARAM_START_PAGE);
+    if (startPage != null) {
+      if (startPage.startsWith(StartLinkProvider.PREFIX_HASH)) {
+        respond(resp, 400, ImmutableMap.of("error", "Invalid start link value"));
+        return;
+      }
+    }
+
     if (params.isEmpty()) {
       respond(resp, 400, ImmutableMap.of("error", "No start link parameters provided"));
 
@@ -151,17 +177,22 @@ public class TgStartLinkServlet extends HttpServlet {
   private static void respond(HttpServletResponse resp,
                               int code,
                               Map data) throws IOException {
+    final String response = mapper.writeValueAsString(data);
+    if (log.isDebugEnabled()) {
+      log.debug("OUT: code = [" + code + "], data = [" + response + "]");
+    }
+
     resp.setStatus(code);
-    resp.getWriter().write(mapper.writeValueAsString(data));
+    resp.getWriter().write(response);
   }
 
   private Map<String, String> parseParams(HttpServletRequest req) {
     return new HashMap<String, String>() {{
       final Enumeration<String> names = req.getParameterNames();
       while (names.hasMoreElements()) {
-        final String name = names.nextElement();
+        final String name = trimToNull(names.nextElement());
         final String value = trimToNull(req.getParameter(name));
-        if (value != null) {
+        if (name != null && value != null) {
           put(name, value);
         }
       }
