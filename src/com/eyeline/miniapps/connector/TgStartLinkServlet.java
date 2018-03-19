@@ -30,9 +30,10 @@ public class TgStartLinkServlet extends HttpServlet {
   private static final ObjectMapper mapper = new ObjectMapper();
 
   // Specially-handled parameters.
-  public static final String PARAM_BASE_LINK    = "link";
-  public static final String PARAM_START_PAGE   = "start";
-  public static final String PARAM_REF_ID       = "ref_id";
+  public static final String PARAM_BASE_LINK        = "link";
+  public static final String PARAM_START_PAGE       = "start";
+  public static final String PARAM_START_PAGE_URL   = "start_page";
+  public static final String PARAM_REF_ID           = "ref_id";
 
   @Override
   protected void doGet(HttpServletRequest req,
@@ -108,11 +109,14 @@ public class TgStartLinkServlet extends HttpServlet {
     }
 
     final String startPage = params.get(PARAM_START_PAGE);
-    if (startPage != null) {
-      if (startPage.startsWith(StartLinkProvider.PREFIX_HASH)) {
-        respond(resp, 400, ImmutableMap.of("error", "Invalid start link value"));
-        return;
-      }
+    final String startPageUrl = params.get(PARAM_START_PAGE_URL);
+    if (startPage != null && startPageUrl != null) {
+      respond(resp, 400, ImmutableMap.of("error", "Only one of [start] and [start_page] may be specified"));
+      return;
+
+    } else if (startPage != null && startPage.startsWith(StartLinkProvider.PREFIX_HASH)) {
+      respond(resp, 400, ImmutableMap.of("error", "Invalid start link value"));
+      return;
     }
 
     if (params.isEmpty()) {

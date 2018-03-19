@@ -8,19 +8,15 @@ import jersey.repackaged.com.google.common.primitives.Ints;
 import org.apache.commons.lang.StringUtils;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
-import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import org.msgpack.value.impl.ImmutableExtensionValueImpl;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -115,17 +111,17 @@ public class StartLinkProvider {
       if (v instanceof String) {
         final String stringVal = (String) v;
 
-        if (stringVal.equals(RefId.getValue())) {
-          return ValueFactory.newInteger(1);
-//          return RefId.newRefId();
+        if (isMapKey && stringVal.equals(RefId.getValue())) {
+          return RefId.getBinValue();
 
-        } else if (stringVal.equals(StartPage.getValue())) {
-          return ValueFactory.newInteger(2);
-//          return StartPage.newStartPage();
+        } else if (isMapKey && stringVal.equals(StartPage.getValue())) {
+          return StartPage.getBinValue();
+
+        } else if (isMapKey && stringVal.equals(StartPageUrl.getValue())) {
+          return StartPageUrl.getBinValue();
 
         } else if (StringUtils.isAsciiPrintable(stringVal)) {
           return ValueFactory.newBinary(stringVal.getBytes(StandardCharsets.US_ASCII));
-//          return AsciiStringValue.newValue(stringVal);
 
         } else {
           return ValueFactory.newString(stringVal); // UTF-8
@@ -155,19 +151,6 @@ public class StartLinkProvider {
         return builder.build();
       }
 
-//      if (v.getClass().isArray()) {
-//        final Class<?> cType = v.getClass().getComponentType();
-//        if (byte.class == cType) {
-//          return ValueFactory.newBinary((byte[]) v);
-//
-//        } else {
-//          final Object[] array = (Object[]) v;
-//          return ValueFactory.newArray(
-//              Arrays.stream(array).map(MsgPackUtil::asValue).toArray(Value[]::new)
-//          );
-//        }
-//      }
-
       log.warning("Object [" + v + "] cannot be serialized: the type is not supported");
 
       return ValueFactory.newNil();
@@ -186,11 +169,14 @@ public class StartLinkProvider {
       if (v.isNumberValue()) {
         final Long longVal = v.asNumberValue().toLong();
 
-        if (isMapKey && longVal == 1) {
+        if (isMapKey && longVal == RefId.TYPE) {
           return (T) RefId.getValue();
 
-        } else if (isMapKey && longVal == 2) {
+        } else if (isMapKey && longVal == StartPage.TYPE) {
           return (T) StartPage.getValue();
+
+        } else if (isMapKey && longVal == StartPageUrl.TYPE) {
+          return (T) StartPageUrl.getValue();
 
         } else {
           return (T) longVal;
@@ -203,25 +189,6 @@ public class StartLinkProvider {
 
       if (v.isBooleanValue()) {
         return (T) (Boolean) v.asBooleanValue().getBoolean();
-      }
-
-      if (v.isArrayValue()) {
-        final List oArray = v
-            .asArrayValue()
-            .list()
-            .stream()
-            .map(MsgPackUtil::asObject)
-            .collect(Collectors.toList());
-
-        if (!oArray.isEmpty()) {
-          return (T) oArray.toArray(
-              (Object[]) Array.newInstance(oArray.get(0).getClass(), oArray.size())
-          );
-
-        } else {
-          // We're screwed.
-          return (T) oArray;
-        }
       }
 
       if (v.isMapValue()) {
@@ -238,24 +205,9 @@ public class StartLinkProvider {
             );
       }
 
-      if (v.isExtensionValue()) {
-        final ExtensionValue extValue = v.asExtensionValue();
-
-        if (extValue.getType() == AsciiStringValue.TYPE) {
-          return (T) new String(extValue.getData(), StandardCharsets.US_ASCII);
-
-        } else if (extValue.getType() == RefId.TYPE) {
-          return (T) RefId.getValue();
-
-        } else if (extValue.getType() == StartPage.TYPE) {
-          return (T) StartPage.getValue();
-        }
-      }
-
+      // ASCII-printable strings always encoded as binary.
       if (v.isBinaryValue()) {
         return (T) new String(v.asBinaryValue().asByteArray(), StandardCharsets.US_ASCII);
-//        return ValueFactory.newBinary(stringVal.getBytes(StandardCharsets.US_ASCII));
-//        return (T) v.asBinaryValue().asByteArray();
       }
 
       log.warning("Value [" + v + "] cannot be deserialized: the type is not supported");
@@ -270,39 +222,29 @@ public class StartLinkProvider {
   //
 
 
-  static class AsciiStringValue extends ImmutableExtensionValueImpl {
-
-    static final byte TYPE = (byte) 0x01;
-
-    private AsciiStringValue(byte type, byte[] data) {
-      super(type, data);
-    }
-
-    static AsciiStringValue newValue(String string) {
-      return new AsciiStringValue(TYPE, string.getBytes(StandardCharsets.US_ASCII));
-    }
-
-  }
-
-  // TODO: fix these extensions to require 1 byte (3 bytes now: EXT8 + len + type).
-  static class RefId extends ImmutableExtensionValueImpl {
-
-    static final byte TYPE = (byte) 0x02;
-
-    private RefId(byte type, byte[] data) { super(type, data); }
-    static RefId newRefId() { return new RefId(TYPE, new byte[0]); }
+  static class RefId {
+    static final byte TYPE = 1;
 
     static String getValue() { return TgStartLinkServlet.PARAM_REF_ID; }
+    static Value getBinValue() {
+      return ValueFactory.newInteger(TYPE);
+    }
   }
 
-  static class StartPage extends ImmutableExtensionValueImpl {
+  static class StartPage {
 
-    static final byte TYPE = (byte) 0x03;
-
-    private StartPage(byte type, byte[] data) { super(type, data); }
-    static StartPage newStartPage() { return new StartPage(TYPE, new byte[0]); }
+    static final byte TYPE = 2;
 
     static String getValue() { return TgStartLinkServlet.PARAM_START_PAGE; }
+    static Value getBinValue() { return ValueFactory.newInteger(TYPE); }
+  }
+
+  static class StartPageUrl {
+
+    static final byte TYPE = 3;
+
+    static String getValue() { return TgStartLinkServlet.PARAM_START_PAGE_URL; }
+    static Value getBinValue() { return ValueFactory.newInteger(TYPE); }
   }
 
 

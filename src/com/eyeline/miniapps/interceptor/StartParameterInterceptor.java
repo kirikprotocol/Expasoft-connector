@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -85,6 +86,11 @@ public class StartParameterInterceptor extends BlankInterceptor implements Inita
                     tryRedirect(request, log, pageId);
                 }
 
+                String pageUrl = (String)params.get(TgStartLinkServlet.PARAM_START_PAGE_URL);
+                if (pageUrl != null) {
+                    this.redirectRequest(request, pageUrl, log);
+                }
+
             } catch (Exception e) {
                 log.warn("Start link parsing failed, falling back to page redirect:" +
                     " start = [" + startParameter + "]", e);
@@ -108,6 +114,41 @@ public class StartParameterInterceptor extends BlankInterceptor implements Inita
             } catch (Exception e) {
                 log.warn("Can't get pages from hosting API", e);
             }
+        }
+    }
+
+    private void redirectRequest(SADSRequest request, String pageUri, Log log) throws Exception {
+        String serviceRoot = request.getServiceScenario().getAttributes().getProperty("start-page");
+        String redirectTarget = UrlUtils.merge(serviceRoot, pageUri);
+        this.overrideRequestParams(log, request, pageUri);
+        if (log.isDebugEnabled()) {
+            log.debug("Redirect attribute found in the request: [" + pageUri + "]," + " redirecting to [" + redirectTarget + "]");
+        }
+
+        request.setResourceURI(redirectTarget);
+    }
+
+    private void overrideRequestParams(Log log, SADSRequest request, String pageId) {
+        boolean doOverride = InitUtils.getBoolean("override.page.id.request.parameters", true, request.getServiceScenario().getAttributes());
+        if (doOverride) {
+            Map<String, String> newParams = UrlUtils.getParametersMap(pageId);
+            Map<String, String> requestParams = request.getParameters();
+            Iterator var7 = newParams.entrySet().iterator();
+
+            while(var7.hasNext()) {
+                Map.Entry<String, String> newParam = (Map.Entry)var7.next();
+                String name = (String)newParam.getKey();
+                if (requestParams.containsKey(name)) {
+                    String oldValue = (String)requestParams.get(name);
+                    String newValue = (String)newParam.getValue();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Overriding request parameter [" + name + "]: [" + oldValue + "] -> [" + newValue + "]");
+                    }
+
+                    requestParams.replace(name, newValue);
+                }
+            }
+
         }
     }
 
