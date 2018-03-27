@@ -45,5 +45,8 @@
     <dependency org="dom4j" name="dom4j" rev="1.6.1"/>
     <dependency org="javax.servlet" name="servlet-api" rev="2.5"/>
     <dependency org="junit" name="junit" rev="4.10"/>
+
+    <dependency org="org.msgpack" name="msgpack-core" rev="0.8.13"/>
+
   </dependencies>
 </ivy-module>
