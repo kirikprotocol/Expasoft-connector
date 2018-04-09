@@ -16,6 +16,8 @@ public class Page {
     private String customId;
     private String url;
 
+    private String serviceId;
+
     private List<Link> links;
 
     public String getId() {
@@ -58,6 +60,14 @@ public class Page {
 
     public void setLinks(List<Link> links) {
         this.links = links;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     public static class Link {
@@ -122,7 +132,8 @@ public class Page {
                 "id='" + id + '\'' +
                 ", customId='" + customId + '\'' +
                 ", url='" + url + '\'' +
-                ", links=" + links +
+                ", links=" + links + '\'' +
+                ", serviceId='" + serviceId +
                 '}';
     }
 
@@ -133,12 +144,12 @@ public class Page {
 
         Page page = (Page) o;
 
-        return id.equals(page.id);
+        return id.equals(page.id) && serviceId.equals(page.serviceId);
 
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return (id + '_' + serviceId).hashCode();
     }
 }

@@ -39,11 +39,12 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
     private Set<String> skipUrls;
     private Map<String, String> replacePages;
 
-    String hostingApiEndpoint;
-    String hostingApiBaseurl;
+    String hostingApiEndpoints;
+    //String hostingApiBaseurl;
 
     private boolean unknownEnabled;
-    private double thresholdUnknown;
+    private double unknownThreshold;
+    private String unknownIntent;
     private String forwardUnknownPage;
 
     private String ignoreText;
@@ -61,7 +62,7 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
             if (helper!=null) {
                 Page currentPage = helper.getById(id);
                 request.getSession().setAttribute(SESS_ATTR_CURRENT_PAGE, currentPage);
-                log.info("Storing current page in session: "+currentPage);
+                log.debug("Storing current page in session: "+currentPage);
             }
         }
     }
@@ -86,26 +87,34 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
         }
     }
 
+
+    private ServiceAiHelper getServiceAiHelper() throws InterceptionException {
+        try {
+            Set<Page> pages = new HashSet<>();
+            for (String hostingApiEndpoint : hostingApiEndpoints.split(" ")) {
+                HostingApi hostingApi = new HostingApi(hostingApiEndpoint);
+                pages.addAll(hostingApi.getPages());
+            }
+            return new ServiceAiHelper(pages);
+        } catch (Exception e) {
+            throw new InterceptionException(e);
+        }
+    }
+
     @Override
     public void onRequest(SADSRequest request, RequestDispatcher dispatcher) throws InterceptionException {
         Log log = SADSLogger.getLogger(request, this.getClass());
         if (!switchProcessedRequest(request)) {
-            log.info("request is already processed (probably 302 redirect). DONE");
+            log.debug("request is already processed (probably 302 redirect). DONE");
             return;
         }
-        ServiceAiHelper helper;
-        try {
-            HostingApi hostingApi = new HostingApi(hostingApiEndpoint);
-            helper = new ServiceAiHelper(hostingApi.getPages());
-            request.getAttributes().put(REQ_ATTR_HELPER, helper);
-        } catch (Exception e) {
-            throw new InterceptionException(e);
-        }
+        ServiceAiHelper helper = getServiceAiHelper();
+        request.getAttributes().put(REQ_ATTR_HELPER, helper);
         String event = request.getParameters().get("event");
-        log.info("incoming event: "+event);
+        log.debug("incoming event: "+event);
         if ("message".equals(event)) {
             String text = request.getParameters().get("event.text");
-            log.info("it is a text event! user said: "+text);
+            log.debug("it is a text event! user said: "+text);
             if (StringUtils.isNotBlank(text)) {
                 boolean isStartDialog = false;
                 Page currentPage = (Page) request.getSession().getAttribute(SESS_ATTR_CURRENT_PAGE);
@@ -114,106 +123,123 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
                     isStartDialog = true;
                 }
                 if (currentPage!=null) {
-                    log.info("current page: "+currentPage);
+                    log.debug("current page: "+currentPage);
                     if (isNeedToSkipUrl(request)) {
-                        log.info("the page is in skip url list. DONE");
+                        log.debug("the page is in skip url list. DONE");
                         return;
                     }
                     if (hardSkipPages.contains(currentPage.getId())) {
-                        log.info("the page is in HARD prohibited list! DONE");
+                        log.debug("the page is in HARD prohibited list! DONE");
                         request.getParameters().put("pid", currentPage.getId());
                         //this.redirectRequest(request, currentPage, true, log);
                         return;
                     }
 
                     if (skipPages.contains(currentPage.getId())) {
-                        log.info("the page is in prohibited list! DONE");
+                        log.debug("the page is in prohibited list! DONE");
                         this.redirectRequest(request, currentPage, true, log);
                         return;
                     }
                     if (text.startsWith(ignoreText)) {
-                        log.info("currentText is started with ignore phrase moving to special page: "+ignorePage);
+                        log.debug("currentText is started with ignore phrase moving to special page: "+ignorePage);
                         this.redirectRequest(request, helper.getById(ignorePage), true, log);
                         return;
                     }
                     List<AiAgent.Prediction> predictions;
                     try {
                         String filteredText = chatFilter.filter(text);
-                        log.info("filtered text: "+filteredText);
+                        log.debug("filtered text: "+filteredText);
                         predictions = ai.predict(filteredText);
                     } catch (Exception e) {
                         throw new InterceptionException(e);
                     }
-                    log.info("predictions: "+predictions);
+                    log.debug("predictions: "+predictions);
                     if (predictions.size()==0) {
-                        log.info("No predictions aquired. return");
+                        log.debug("No predictions aquired. return");
                         return;
                     }
                     String intentName;
                     if (localPriority) {
-                        log.info("trying to get best intents with thr="+threshold);
+                        log.debug("trying to get best intents with thr="+threshold);
                         List<AiAgent.Prediction> best;
                         if (relativeFilter) {
-                            log.info("using relative filter: relative proportion of prediction must be greater than "+threshold);
+                            log.debug("using relative filter: relative proportion of prediction must be greater than "+threshold);
                             best = helper.filterByRelative(predictions, threshold, log);
                         } else {
-                            log.info("using average filter: score of prediction must be greater than average score + ("+threshold+")");
+                            log.debug("using average filter: score of prediction must be greater than average score + ("+threshold+")");
                             best = helper.filterByAvg(predictions, threshold, log);
                         }
-                        log.info("got"+best);
+                        log.debug("got"+best);
                         intentName = helper.bestIntent(currentPage, best, log);
                     } else {
                         intentName = predictions.get(0).getIntent();
                     }
-                    log.info("determined intent: "+intentName);
+                    log.debug("determined intent: "+intentName);
                     if (unknownEnabled) {
+                        /*
                         for (AiAgent.Prediction prediction: predictions) {
                             if (intentName.equals(prediction.getIntent())) {
-                                log.info("Test probability of: "+intentName+", proba="+prediction.getProba()+" with "+thresholdUnknown);
-                                if (prediction.getProba()<=thresholdUnknown) {
-                                    log.info("redirecting to page: "+forwardUnknownPage);
+                                log.debug("Test probability of: "+intentName+", proba="+prediction.getProba()+" with "+unknownThreshold);
+                                if (prediction.getProba()<=unknownThreshold) {
+                                    log.debug("redirecting to page: "+forwardUnknownPage);
                                     this.redirectRequest(request, helper.getById(forwardUnknownPage), false, log);
                                     return;
                                 }
                             }
                         }
+                        */
+                        if (intentName == null) {
+                            log.debug("no intent determined, unknown intent will be used: " + unknownIntent);
+                            intentName = unknownIntent;
+                        } else {
+                            for (AiAgent.Prediction prediction: predictions) {
+                                if (intentName.equals(prediction.getIntent())) {
+                                    log.debug("Test probability of: "+intentName+", proba="+prediction.getProba()+" with "+ unknownThreshold);
+                                    if (prediction.getProba()<= unknownThreshold) {
+                                        log.debug("determined intent proba is too low, unknown intent will be used: " + unknownIntent);
+                                        intentName = unknownIntent;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                     if (isStartDialog) {
-                        log.info("It is a start of the dialog. Trying to find global intent: "+intentName);
+                        log.debug("It is a start of the dialog. Trying to find global intent: "+intentName);
                         Page nextPage = helper.lookupGlobal(intentName);
-                        log.info("Found: "+nextPage);
+                        log.debug("Found: "+nextPage);
                         if (nextPage!=null) {
                             this.redirectRequest(request, nextPage, false, log);
-                            log.info("Redirected to: "+nextPage.getUrl()+" redirected by global intent (at the start of dialog). Done");
+                            log.debug("Redirected to: "+nextPage.getUrl()+" redirected by global intent (at the start of dialog). Done");
                             return;
                         } else {
-                            log.info("Page is not found by global intent: "+intentName);
+                            log.debug("Page is not found by global intent: "+intentName);
                             return;
                         }
                     } else {
-                        log.info("It is continue of the dialog. Trying to find local intent: "+intentName);
+                        log.debug("It is continue of the dialog. Trying to find local intent: "+intentName);
                         Page nextPage = helper.lookupLocal(currentPage, intentName);
-                        log.info("Got next page: "+nextPage);
+                        log.debug("Got next page: "+nextPage);
                         if (nextPage!=null) {
                             this.redirectRequest(request, nextPage, false, log);
-                            log.info("Redirected to: "+nextPage.getUrl()+" redirected by local intent. Done");
+                            log.debug("Redirected to: "+nextPage.getUrl()+" redirected by local intent. Done");
                             return;
                         } else {
-                            log.info("It is continue of the dialog. Trying to find tree intent: "+intentName);
+                            log.debug("It is continue of the dialog. Trying to find tree intent: "+intentName);
                             nextPage = helper.lookupTree(currentPage, intentName, log);
                             if (nextPage!=null) {
                                 this.redirectRequest(request, nextPage, false, log);
-                                log.info("url: "+nextPage.getUrl()+" redirected by tree intent. Done");
+                                log.debug("url: "+nextPage.getUrl()+" redirected by tree intent. Done");
                                 return;
                             } else {
-                                log.info("It is continue of the dialog. Trying to find global intent: "+intentName);
+                                log.debug("It is continue of the dialog. Trying to find global intent: "+intentName);
                                 nextPage = helper.lookupGlobal(intentName);
                                 if (nextPage!=null) {
                                     this.redirectRequest(request, nextPage, false, log);
-                                    log.info("url: "+nextPage.getUrl()+" redirected by global intent (continue dialog). Done");
+                                    log.debug("url: "+nextPage.getUrl()+" redirected by global intent (continue dialog). Done");
                                     return;
                                 } else {
-                                    log.info("Can't found any page by intent: "+intentName+" and page: "+currentPage);
+                                    log.debug("Can't found any page by intent: "+intentName+" and page: "+currentPage);
                                     this.redirectRequest(request, currentPage, true, log);
                                     return;
                                 }
@@ -221,11 +247,11 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
                         }
                     }
                 } else {
-                    log.info("current page is null. skip");
+                    log.debug("current page is null. skip");
                 }
             }
         } else if ("link".equals(event)){
-            log.info("it is a link event! current link: "+request.getResourceURI());
+            log.debug("it is a link event! current link: "+request.getResourceURI());
             Page currentPage = (Page) request.getSession().getAttribute(SESS_ATTR_CURRENT_PAGE);
             if (currentPage == null) {
                 currentPage = helper.getByUrl(request.getResourceURI());
@@ -233,7 +259,7 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
             if (currentPage!=null) {
                 if (replacePages.containsKey(currentPage.getId())) {
                     String url = replacePages.get(currentPage.getId());
-                    log.info("the page is in replace list. Replace to URL: "+url);
+                    log.debug("the page is in replace list. Replace to URL: "+url);
                     this.redirectRequest(request, currentPage, url, log);
                     return;
                 }
@@ -244,7 +270,7 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
     private void redirectRequest(SADSRequest request, Page toPage, boolean defaultLink, Log log){
         if (replacePages.containsKey(toPage.getId())) {
             String url = replacePages.get(toPage.getId());
-            log.info("the page is in replace list. Replace to URL: "+url);
+            log.debug("the page is in replace list. Replace to URL: "+url);
             this.redirectRequest(request, toPage, url, log);
             return;
         }
@@ -269,9 +295,12 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
         requestUrl = StringUtils.replace(requestUrl, "/start?","/index?");
         if (!defaultLink) {
             requestUrl = UrlUtils.removeParameter(requestUrl, "answer");
+            requestUrl = UrlUtils.removeParameter(requestUrl, "sver");
             request.getParameters().remove("answer");
+            request.getParameters().remove("sver");
         }
         request.setResourceURI(requestUrl);
+        request.getParameters().put("sid", toPage.getServiceId());
         request.getParameters().put("pid", toPage.getId());
     }
 
@@ -294,8 +323,8 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
         //String hostingApiBaseurl = InitUtils.getString("hosting-api-baseurl", config);
         //HostingApi hostingApi = new HostingApi(hostingApiEndpoint, hostingApiBaseurl);
         //helper = new ServiceAiHelper(hostingApi.getPages());
-        hostingApiEndpoint = InitUtils.getString("hosting-api-endpoint", config);
-        hostingApiBaseurl = InitUtils.getString("hosting-api-baseurl", config);
+        hostingApiEndpoints = InitUtils.getString("hosting-api-endpoints", config);
+        //hostingApiBaseurl = InitUtils.getString("hosting-api-baseurl", config);
         skipPages = new HashSet<>();
         String skipPagesParam = InitUtils.getString("skip-pages", "", config);
         if (StringUtils.isNotBlank(skipPagesParam)) {
@@ -326,8 +355,9 @@ public class AiInterceptor extends BlankInterceptor implements Initable {
             Collections.addAll(skipUrls, skipUrlsParam.split(" "));
         }
         unknownEnabled = InitUtils.getBoolean("unknown-enabled", false, config);
-        thresholdUnknown = InitUtils.getDouble("unknown-threshold", 0.01, config);
-        forwardUnknownPage = InitUtils.getString("unknown-page", "71", config);
+        unknownThreshold = InitUtils.getDouble("unknown-threshold", 0.01, config);
+        unknownIntent = InitUtils.getString("unknown-intent", "unknown.intent", config);
+        //forwardUnknownPage = InitUtils.getString("unknown-page", "71", config);
 
         ignoreText = InitUtils.getString("ignore-text", "пользователь nickname=", config);
         ignorePage = InitUtils.getString("ignore-page", "117", config);

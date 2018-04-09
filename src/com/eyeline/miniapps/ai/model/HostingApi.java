@@ -23,9 +23,12 @@ public class HostingApi {
 
     private HttpClientBuilder builder;
 
+    private String serviceId;
+
     public HostingApi(String endpoint) {
         this.url = endpoint;
         this.builder = HttpClientBuilder.create();
+        serviceId = UrlUtils.getParameter(url, "sid");
     }
 
     public Set<Page> getPages() throws Exception {
@@ -41,6 +44,9 @@ public class HostingApi {
                 log.trace("HostingAPI >> "+responseString);
             }
             Page[] pages = MarshalUtils.unmarshal(MarshalUtils.parse(responseString), Page[].class);
+            for (Page page: pages) {
+                page.setServiceId(serviceId);
+            }
             Collections.addAll(result, pages);
 
             return result;
